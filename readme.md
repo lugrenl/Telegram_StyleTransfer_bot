@@ -78,11 +78,11 @@ python-dotenv==0.19.2
 |  | examples         | Изображения с примерами работы модели                             |
 |  | styles           | Предустановленные изображения со стилями                       |
 | model_cyclegan |                  |                                                   |
-|  | checkpoints      | Веса, используемые для создания СycleGAN          |
+|  | checkpoints      | Директория для загрузки весов для создания СycleGAN          |
 |  | models           | Архитектура СycleGAN                              |
 |  | options          | Параметры для создания СycleGAN                   |
-|  | scripts          | Внутри скрипт для загрузки весов CycleGAN         |
-|  | CycleGAN.py      | Пайплайн для СycleGAN                             |
+|  | scripts          | Скрипт для загрузки весов CycleGAN         |
+|  | CycleGAN.py      | Пайплайн СycleGAN                             |
 |  | test.py          | Скрипт для создания моделей с загруженными весами |
 | model_nst |                  |                                                   |
 |  | StyleTransfer.py | Модель и пайплайн для StyleTransfer               |
@@ -92,4 +92,5 @@ python-dotenv==0.19.2
 | keyboards.py |                  | Клавиатуры и сообщения для бота                   |
 | image_processing.py |                  | Запуск пайплайнов для NST и CycleGAN              |
 | requirements.txt |                  | Необходимые пакеты                                |
+| .env |                  | Файл с переменными окружения                               |
 
