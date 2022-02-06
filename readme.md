@@ -32,8 +32,8 @@
 4. Алгоритм переноса стиля использует итеративное изменение входной картинки на основе разницы между style и content картинками.
 
 ## CycleGAN
-Для реализации CycleGAN был взят код junyanz [pytorch-CycleGAN-and-pix2pix](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix),
-котогрый дает возможность использовать CycleGAN и pix2pix модели в различных режимах и на различных датасетах.
+Для реализации CycleGAN был взят код junyanz [pytorch-CycleGAN-and-pix2pix](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix), который, в свою очередь, ссылается на jcjohnson [fast-neural-style] (https://github.com/jcjohnson/fast-neural-style).
+Код дает возможность использовать CycleGAN и pix2pix модели в различных режимах и на различных датасетах.
 
 Перед использованиям в целях оптимизации были выполнены следующие действия:
 1. Архитектура CycleGAN применяется только в режиме для теста, чтобы позволяет генерировать изображения только в одну сторону (папка *models*)
@@ -46,12 +46,12 @@
 5. В папке *scripts* лежит скрипт для загрузки весов предобученного CycleGAN. Для загрузки необходимо перейти в папку с CycleGAN и запустить скрипт с выбранными весами. Все веса загружаются в папку *checkpoints*
 ```
 $ cd model_cyclegan
-$ bash ./scripts/download_cyclegan_model.sh summer2winter_yosemite
+$ bash ./scripts/download_cyclegan_model.sh style_vangogh
 ```
 6. Для того, чтобы избежать сложного создания модели, скрипт test.py был исправлен таким образом, чтобы создать модель со стандартными параметрами и сразу сохранять ее в файл pth для дальнейшего использования ботом. Модели сохраняются в папку *models_wts*. Скрипт *test.py* запускается следующим образом:
 ```
 $ cd model_cyclegan
-$ python test.py --name summer2winter_yosemite_pretrained --model test --no_dropout --gpu_ids -1
+$ python test.py --name style_vangogh_pretrained --model test --no_dropout --gpu_ids -1
 ```
 gpu_ids равен -1, так как подразумевается использование модели только на CPU.
 
