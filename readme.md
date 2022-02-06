@@ -3,6 +3,7 @@
 Это Style Transfer Telegram бот, который умеет переносить стиль с одной фотографии на другую как с помощью классического алгоритма Гатиса так и с использованием CycleGAN.
 Для написания бота использовалась библиотека aiogram для создания асинхронной архитектуры.
 Код телеграм бота находится в файле *bot.py*. В файле *keyboards.py* находятся используемые клавиатуры и длинные сообщения.
+
 <img src='images/examples/styles.jpg' align="right" vspace="5" hspace="5" width=200>
 
 ### Основной функционал бота:
@@ -14,7 +15,6 @@
    * Превратить фотографию в картину, выполненную в стиле работ Моне.
 3. Бот может показать примеры, получаемые в результате выполнения 3 вышеуказанных алгоритмов.
 4. Перенаправить на репозиторий с проектом.  
-
 
 <img src='images/examples/main_menu.jpg' align="right" vspace="5" hspace="5" width=200>
 
@@ -38,6 +38,8 @@
 ## CycleGAN
 Для реализации CycleGAN был взят код junyanz [pytorch-CycleGAN-and-pix2pix](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix), который, в свою очередь, ссылается на jcjohnson [fast_neural_style](https://github.com/jcjohnson/fast-neural-style).
 Код дает возможность использовать CycleGAN и pix2pix модели в различных режимах и на различных датасетах.
+
+<img src='images/examples/cyclegan.jpg' align="right" vspace="5" hspace="5" width=300>
 
 Перед использованиям в целях оптимизации были выполнены следующие действия:
 1. Архитектура CycleGAN применяется только в режиме для теста, чтобы позволяет генерировать изображения только в одну сторону (папка *models*)
