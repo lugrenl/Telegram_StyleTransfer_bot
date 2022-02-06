@@ -32,7 +32,7 @@
 4. Алгоритм переноса стиля использует итеративное изменение входной картинки на основе разницы между style и content картинками.
 
 ## CycleGAN
-Для реализации CycleGAN был взят код junyanz [pytorch-CycleGAN-and-pix2pix](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix), который, в свою очередь, ссылается на jcjohnson [fast-neural-style] (https://github.com/jcjohnson/fast-neural-style).
+Для реализации CycleGAN был взят код junyanz [pytorch-CycleGAN-and-pix2pix](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix), который, в свою очередь, ссылается на jcjohnson [fast_neural_style](https://github.com/jcjohnson/fast-neural-style).
 Код дает возможность использовать CycleGAN и pix2pix модели в различных режимах и на различных датасетах.
 
 Перед использованиям в целях оптимизации были выполнены следующие действия:
