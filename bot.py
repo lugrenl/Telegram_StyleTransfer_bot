@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 from aiogram.utils.executor import start_webhook
 from aiogram import Bot, Dispatcher, executor, types
 
-
 load_dotenv()
 warnings.filterwarnings("ignore")
 
@@ -164,8 +163,10 @@ async def handle_docs_photo(message: types.Message):
 async def echo(message: types.Message):
     await message.answer(kb.menu_message, reply_markup=kb.start_keyboard())
 
+
 async def on_startup():
     await bot.set_webhook(WEBHOOK_URL)
+
 
 async def on_shutdown(disbot):
     logging.warning("Shutting down..")

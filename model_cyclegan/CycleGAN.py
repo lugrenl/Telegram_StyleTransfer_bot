@@ -41,7 +41,7 @@ def run_gan(wts_path, image_name):
     model_path = wts_path
     model = torch.load(model_path)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cpu")
 
     image_processing = ImageProcessing(new_size=512, device=device)
     image = image_processing.image_loader(image_name)
