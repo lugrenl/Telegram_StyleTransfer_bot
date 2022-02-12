@@ -1,3 +1,4 @@
+import copy
 import torch
 import logging
 import torch.nn as nn
@@ -5,7 +6,9 @@ from io import BytesIO
 import torch.optim as optim
 from PIL import Image, ImageOps
 import torch.nn.functional as F
+import torchvision.models as models
 import torchvision.transforms as transforms
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -44,6 +47,9 @@ class ImageProcessing:
 class ContentLoss(nn.Module):
     def __init__(self, target):
         super(ContentLoss, self).__init__()
+        # we 'detach' the target content from the tree used
+        # to dynamically compute the gradient: this is a stated value, not a variable.
+        # Otherwise, the forward method of the criterion will throw an error.
         self.target = target.detach()  # константа, убираем ее из дерева вычислений
         self.loss = F.mse_loss(self.target, self.target)  # to initialize with something
 
@@ -60,26 +66,30 @@ class StyleLoss(nn.Module):
 
     @staticmethod
     def gram_matrix(input):
-        batch_size, h, w, f_map_num = input.size()
+        batch_size, h, w, f_map_num = input.size()  # batch size(=1)
+        # (h,w) = dimensions of a feature map (N=h*w)
         features = input.view(batch_size * h, w * f_map_num)  # resize F_XL into \hat F_XL
-        G = torch.mm(features, features.t())  # compute the gram product
+        g = torch.mm(features, features.t())  # compute the gram product
         # we 'normalize' the values of the gram matrix
         # by dividing by the number of element in each feature maps.
-        return G.div(batch_size * h * w * f_map_num)
+        return g.div(batch_size * h * w * f_map_num)
 
     def forward(self, input):
-        gram = self.gram_matrix(input)
-        self.loss = F.mse_loss(gram, self.target)
+        g = self.gram_matrix(input)
+        self.loss = F.mse_loss(g, self.target)
         return input
 
 
 class Normalization(nn.Module):
     def __init__(self, device):
         super(Normalization, self).__init__()
+        # .view the mean and std to make them [C x 1 x 1] so that they can
+        # directly work with image Tensor of shape [B x C x H x W].
         self.mean = torch.tensor([0.485, 0.456, 0.406]).view(-1, 1, 1).to(device)
         self.std = torch.tensor([0.229, 0.224, 0.225]).view(-1, 1, 1).to(device)
 
     def forward(self, img):
+        # normalize img
         return (img - self.mean) / self.std
 
 
@@ -94,32 +104,20 @@ class StyleTransfer:
         self.style_layers = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
 
     def get_style_model_and_losses(self, style_img, content_img):
-        # vgg19
-        cnn = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=1),
-            nn.ReLU(),
-            nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False),
-            nn.Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=1),
-            nn.ReLU(),
-            nn.Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False),
-            nn.Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=1)
-        )
-        
-        # cnn = models.vgg19(pretrained=False, progress=False)
-        # cnn = copy.deepcopy(cnn.features[:11])
+
+        cnn = models.vgg19(pretrained=False, progress=False)
+        cnn = copy.deepcopy(cnn.features[:11])
         
         cnn.load_state_dict(torch.load("models_wts/vgg19.pth", map_location=torch.device(self.device)))
         cnn = cnn.to(self.device).eval()
 
         normalization = Normalization(self.device).to(self.device)
 
-        content_losses = []
-        style_losses = []
+        content_losses = []  # just in order to have an iterable access to or list of content/style
+        style_losses = []  # losses
 
+        # assuming that cnn is a nn.Sequential, so we make a new nn.Sequential
+        # to put in modules that are supposed to be activated sequentially
         model = nn.Sequential(normalization)
 
         i = 0
@@ -131,18 +129,24 @@ class StyleTransfer:
                 name = 'bn_{}'.format(i)
             elif isinstance(layer, nn.ReLU):
                 name = 'relu_{}'.format(i)
+                # The in-place version doesn't play very nicely with the ContentLoss
+                # and StyleLoss we insert below. So we replace with out-of-place
+                # ones here.
+                layer = nn.ReLU(inplace=False)  # Переопределим relu уровень
             elif isinstance(layer, nn.MaxPool2d):
                 name = 'pool_{}'.format(i)
 
             model.add_module(name, layer)
 
             if name in self.content_layers:
+                # add content loss:
                 target = model(content_img).detach()
                 content_loss = ContentLoss(target)
                 model.add_module("content_loss_{}".format(i), content_loss)
                 content_losses.append(content_loss)
 
             if name in self.style_layers:
+                # add style loss:
                 target_feature = model(style_img).detach()
                 style_loss = StyleLoss(target_feature)
                 model.add_module("style_loss_{}".format(i), style_loss)
@@ -152,6 +156,7 @@ class StyleTransfer:
 
     @staticmethod
     def get_input_optimizer(input_img):
+        # добaвляет содержимое тензора картинки в список изменяемых оптимизатором параметров
         optimizer = optim.LBFGS([input_img.requires_grad_()])
         return optimizer
 
@@ -165,6 +170,8 @@ class StyleTransfer:
         while run[0] <= self.num_steps:
 
             def closure():
+                # correct the values
+                # это для того, чтобы значения тензора картинки не выходили за пределы [0;1]
                 input_img.data.clamp_(0, 1)
 
                 optimizer.zero_grad()
@@ -179,10 +186,11 @@ class StyleTransfer:
                 for cl in content_losses:
                     content_score += cl.loss
 
+                # взвешивание ощибки
                 style_score *= self.style_weight
                 content_score *= self.content_weight
+
                 loss = style_score + content_score
-                # torch.autograd.set_detect_anomaly(True)
                 loss.backward()
 
                 if run[0] % 50 == 0:
@@ -193,6 +201,7 @@ class StyleTransfer:
 
             optimizer.step(closure)
 
+        # a last correction...
         input_img.data.clamp_(0, 1)
 
         return input_img
