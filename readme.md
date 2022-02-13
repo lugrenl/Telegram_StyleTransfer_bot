@@ -62,9 +62,11 @@ $ python test.py --name style_vangogh_pretrained --model test --no_dropout --gpu
 gpu_ids равен -1, так как подразумевается использование модели только на CPU.
 
 ## VPS
-Телеграм бот был установлен на VPS c "белым" IP-адресом.  
+Телеграм бот был установлен на VPS cо статическим IP-адресом.  
 ОС: Debian 11.2  
-Бот работает с применением *webhook*
+CPU: 6 cores
+RAM: 8Gb
+SSD: 50Gb
 
 ## Библиотеки необходимые для работы
 В связи с тем, что все вычисления выполняются на CPU, установлены СCPU версии Torch и Torchvision.  
