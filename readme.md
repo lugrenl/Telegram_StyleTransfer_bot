@@ -92,7 +92,7 @@ python-dotenv==0.19.2
 |  | test.py          | Скрипт для создания моделей с загруженными весами |
 | model_nst |                  |                                                   |
 |  | StyleTransfer.py | Модель и пайплайн для StyleTransfer               |
-|  | train_vgg19.py   | Дообучение модели VGG19 на датасете ScalTech      |
+|  | train_vgg19.ipynb   | Дообучение модели VGG19 на датасете ScalTech      |
 | models_wts |                  | Веса для всех моделей                             |
 | bot.py |                  | Код телеграм бота                                 |
 | keyboards.py |                  | Клавиатуры и сообщения для бота                   |
